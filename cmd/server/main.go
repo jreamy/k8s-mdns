@@ -33,7 +33,18 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) {
 
 	inf.Start(ctx.Done())
 
-	services, err := serviceInformer.Lister().Services("default").List(labels.Everything())
+	services, err := serviceInformer.Lister().Services("").List(labels.Everything())
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	for _, s := range services {
+		fmt.Printf("%+v\n", s)
+	}
+
+	fmt.Println("try 2")
+
+	services, err = serviceInformer.Lister().Services("").List(labels.NewSelector())
 	if err != nil {
 		log.Fatal(err.Error())
 	}
