@@ -18,7 +18,11 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	cli := kubernetes.NewForConfigOrDie(cfg)
+	cli, err := kubernetes.NewForConfig(cfg)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	ListServices(context.Background(), cli)
 }
 
