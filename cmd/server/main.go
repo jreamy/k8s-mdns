@@ -6,8 +6,6 @@ import (
 	"log"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 )
@@ -29,34 +27,10 @@ func main() {
 
 // ListServices lists services
 func ListServices(ctx context.Context, kubeClient kubernetes.Interface) {
-	inf := informers.NewSharedInformerFactoryWithOptions(kubeClient, 0)
-	serviceInformer := inf.Core().V1().Services()
-
-	inf.Start(ctx.Done())
-
-	services, err := serviceInformer.Lister().Services("").List(labels.Everything())
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	for _, s := range services {
-		fmt.Printf("%+v\n", s)
-	}
-
-	fmt.Println("try 2")
-
-	services, err = serviceInformer.Lister().Services("").List(labels.NewSelector())
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	for _, s := range services {
-		fmt.Printf("%+v\n", s)
-	}
-
-	fmt.Println("try 3")
-
 	svc, err := kubeClient.CoreV1().Services("").List(ctx, v1.ListOptions{})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	for _, s := range svc.Items {
 		fmt.Printf("%+v\n", s)
