@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
@@ -50,6 +51,14 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) {
 	}
 
 	for _, s := range services {
+		fmt.Printf("%+v\n", s)
+	}
+
+	fmt.Println("try 3")
+
+	svc, err := kubeClient.CoreV1().Services("").List(ctx, v1.ListOptions{})
+
+	for _, s := range svc.Items {
 		fmt.Printf("%+v\n", s)
 	}
 }
