@@ -31,6 +31,8 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) {
 	inf := informers.NewSharedInformerFactoryWithOptions(kubeClient, 0)
 	serviceInformer := inf.Core().V1().Services()
 
+	inf.Start(ctx.Done())
+
 	services, err := serviceInformer.Lister().Services("default").List(labels.Everything())
 	if err != nil {
 		log.Fatal(err.Error())
