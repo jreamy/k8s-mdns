@@ -124,8 +124,8 @@ func (s *Services) Records(q dns.Question) []dns.RR {
 	const defaultTTL = 120
 
 	if ip := net.ParseIP(dnsutil.ExtractAddressFromReverse(q.Name)); ip != nil {
-		for _, s := range Services {
-			if s.IP.Equals(ip) {
+		for _, s := range *s {
+			if s.IP.Equal(ip) {
 				fmt.Println("responding to arp request for " + ip.String() + " with " + s.Hostname)
 				return []dns.RR{&dns.A{
 					Hdr: dns.RR_Header{
