@@ -36,11 +36,15 @@ func main() {
 	fmt.Println(s)
 
 	info := []string{"game"}
-	service, _ := mdns.NewMDNSService(s[0].IP.String(), "_http._tcp", "", "", 80, nil, info)
+	service, err := mdns.NewMDNSService(s[0].IP.String(), "_http._tcp", "", "", 80, nil, info)
+	fmt.Println(err)
 
 	// Create the mDNS server, defer shutdown
-	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
+	server, err := mdns.NewServer(&mdns.Config{Zone: service})
 	defer server.Shutdown()
+	fmt.Println(err)
+
+	fmt.Println("server started")
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
