@@ -35,8 +35,9 @@ func main() {
 
 	fmt.Println(s)
 
+	g := s[0]
 	info := []string{"game"}
-	service, err := mdns.NewMDNSService(s[0].IP.String(), "_http._tcp", "", "", 80, nil, info)
+	service, err := mdns.NewMDNSService(g.IP.String(), "_http._tcp", g.Hostname, g.Hostname, 80, []net.IP{g.IP}, info)
 	fmt.Println(err)
 
 	// Create the mDNS server, defer shutdown
