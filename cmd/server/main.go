@@ -43,7 +43,10 @@ func main() {
 	}
 
 	// Create the mDNS server, defer shutdown
-	server, err := mdns.NewServer(&mdns.Config{Zone: service})
+	server, err := mdns.NewServer(&mdns.Config{
+		Zone:              service,
+		LogEmptyResponses: true,
+	})
 	defer server.Shutdown()
 	if err != nil {
 		log.Fatal(err.Error())
