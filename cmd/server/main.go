@@ -28,6 +28,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	fmt.Println(s)
 }
 
 type Service struct {
