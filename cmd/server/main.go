@@ -61,6 +61,9 @@ func main() {
 
 	all := Services(append(services, s...))
 
+	data, _ := json.MarshalIndent(all, "", "  ")
+	fmt.Println(string(data))
+
 	// Create the mDNS server, defer shutdown
 	server, err := mdns.NewServer(&mdns.Config{
 		LogEmptyResponses: true,
@@ -101,9 +104,6 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) ([]Servi
 			}
 		}
 	}
-
-	data, _ := json.MarshalIndent(out, "", "  ")
-	fmt.Println(string(data))
 
 	return out, nil
 }
