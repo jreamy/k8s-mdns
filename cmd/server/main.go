@@ -45,7 +45,7 @@ func main() {
 			if ip := net.ParseIP(addr.Address); ip != nil {
 				s.IP = ip
 			} else {
-				s.Hostname = addr.Address
+				s.Hostname = addr.Address + ".local."
 			}
 		}
 
