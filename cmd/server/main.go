@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -33,6 +34,7 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) {
 	}
 
 	for _, s := range svc.Items {
-		fmt.Printf("%+v\n", s)
+		data, _ := json.MarshalIndent(s, "", "  ")
+		fmt.Println(string(data))
 	}
 }
