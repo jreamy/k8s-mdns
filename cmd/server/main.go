@@ -136,7 +136,7 @@ func (s *Services) Records(q dns.Question) []dns.RR {
 						Ttl:    defaultTTL,
 					},
 					A: ip,
-				}
+				},
 			}
 		}
 	}
