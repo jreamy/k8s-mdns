@@ -104,7 +104,7 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) ([]Servi
 		for _, i := range s.Status.LoadBalancer.Ingress {
 			if ip := net.ParseIP(i.IP); ip != nil {
 				out = append(out, Service{
-					Hostname: s.ObjectMeta.Name + ".local",
+					Hostname: s.ObjectMeta.Name + ".local.",
 					IP:       ip,
 				})
 			}
