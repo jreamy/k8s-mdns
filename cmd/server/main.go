@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 
+	"github.com/hashicorp/mdns"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -30,6 +32,15 @@ func main() {
 	}
 
 	fmt.Println(s)
+
+	info := []string{"game"}
+	service, _ := mdns.NewMDNSService(s[0].IP.String(), "_http._tcp", "", "", 80, nil, info)
+
+	// Create the mDNS server, defer shutdown
+	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
+	defer server.Shutdown()
+
+	<-make(chan os.Signal, 1)
 }
 
 type Service struct {
