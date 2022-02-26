@@ -59,10 +59,6 @@ func main() {
 		}
 
 		services = append(services, s)
-		services = append(services, Service{
-			Hostname: ,
-			IP: s.IP,
-		})
 	}
 
 	s, err := ListServices(context.Background(), cli)
@@ -131,6 +127,7 @@ func (s *Services) Records(q dns.Question) []dns.RR {
 	if ip := net.ParseIP(dnsutil.ExtractAddressFromReverse(q.Name)); ip != nil {
 		for _, s := range Services {
 			if s.IP.Equals(ip) {
+				fmt.Println("responding to arp request for " + ip.String() + " with " + s.Hostname)
 				return []dns.RR{&dns.A{
 					Hdr: dns.RR_Header{
 						Name:   s.Hostname,
