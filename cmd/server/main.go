@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -23,26 +24,38 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	ListServices(context.Background(), cli)
-}
-
-// ListServices lists services
-func ListServices(ctx context.Context, kubeClient kubernetes.Interface) {
-	svc, err := kubeClient.CoreV1().Services("").List(ctx, v1.ListOptions{})
+	s, err := ListServices(context.Background(), cli)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+}
 
-	for _, s := range svc.Items {
-		fmt.Println()
+type Service struct {
+	Hostname string
+	IP       net.IP
+}
 
-		fmt.Println("name:     ", s.ObjectMeta.Name)
-		fmt.Println("namespace:", s.ObjectMeta.Namespace)
-		fmt.Println("addr:     ", s.Status.LoadBalancer)
-
-		fmt.Println()
-
-		data, _ := json.MarshalIndent(s, "", "  ")
-		fmt.Println(string(data))
+// ListServices lists services
+func ListServices(ctx context.Context, kubeClient kubernetes.Interface) ([]Service, error) {
+	svc, err := kubeClient.CoreV1().Services("").List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, err
 	}
+
+	var out []Service
+	for _, s := range svc.Items {
+		for _, i := range s.Status.LoadBalancer.Ingress {
+			if ip := net.ParseIP(i.IP); ip != nil {
+				out = append(out, Service{
+					Hostname: s.ObjectMeta.Name + ".local",
+					IP:       ip,
+				})
+			}
+		}
+	}
+
+	data, _ := json.MarshalIndent(out, "", "  ")
+	fmt.Println(string(data))
+
+	return out, nil
 }
