@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/hashicorp/mdns"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,7 +42,9 @@ func main() {
 	server, _ := mdns.NewServer(&mdns.Config{Zone: service})
 	defer server.Shutdown()
 
-	<-make(chan os.Signal, 1)
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	<-sigs
 }
 
 type Service struct {
