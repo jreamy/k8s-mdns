@@ -55,6 +55,8 @@ func main() {
 		if s.Hostname == "" {
 			s.Hostname = s.IP.String()
 		}
+
+		services = append(services, s)
 	}
 
 	s, err := ListServices(context.Background(), cli)
