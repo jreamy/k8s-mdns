@@ -38,7 +38,7 @@ func main() {
 	for _, n := range nodes.Items {
 		var s Service
 
-		fmt.Println(n)
+		fmt.Println(n.Status.Addresses)
 
 		for _, addr := range n.Status.Addresses {
 			if ip := net.ParseIP(addr.Address); ip != nil {
