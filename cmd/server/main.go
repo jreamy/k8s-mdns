@@ -8,6 +8,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/hashicorp/mdns"
@@ -15,6 +16,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
+	"github.com/coredns/coredns/plugin/pkg/dnsutil"
 )
 
 func main() {
@@ -57,6 +59,10 @@ func main() {
 		}
 
 		services = append(services, s)
+		services = append(services, Service{
+			Hostname: ,
+			IP: s.IP,
+		})
 	}
 
 	s, err := ListServices(context.Background(), cli)
@@ -119,6 +125,24 @@ func (s *Services) Records(q dns.Question) []dns.RR {
 	fmt.Printf("%+v\n", q)
 	data, _ := json.Marshal(q)
 	fmt.Println(string(data))
+
+	const defaultTTL = 120
+
+	if ip := net.ParseIP(dnsutil.ExtractAddressFromReverse(q.Name)); ip != nil {
+		for _, s := range Services {
+			if s.IP.Equals(ip) {
+				return []dns.RR{&dns.A{
+					Hdr: dns.RR_Header{
+						Name:   s.Hostname,
+						Rrtype: dns.TypeA,
+						Class:  dns.ClassINET,
+						Ttl:    defaultTTL,
+					},
+					A: ip,
+				}
+			}
+		}
+	}
 
 	return nil
 }
