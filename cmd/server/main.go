@@ -8,15 +8,14 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 
+	"github.com/coredns/coredns/plugin/pkg/dnsutil"
 	"github.com/hashicorp/mdns"
 	"github.com/miekg/dns"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"github.com/coredns/coredns/plugin/pkg/dnsutil"
 )
 
 func main() {
@@ -136,7 +135,7 @@ func (s *Services) Records(q dns.Question) []dns.RR {
 						Ttl:    defaultTTL,
 					},
 					A: ip,
-				},
+				}}
 			}
 		}
 	}
