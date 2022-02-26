@@ -34,6 +34,14 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) {
 	}
 
 	for _, s := range svc.Items {
+		fmt.Println()
+
+		fmt.Println("name:     ", s.ObjectMeta.Name)
+		fmt.Println("namespace:", s.ObjectMeta.Namespace)
+		fmt.Println("addr:     ", s.Status.LoadBalancer)
+
+		fmt.Println()
+
 		data, _ := json.MarshalIndent(s, "", "  ")
 		fmt.Println(string(data))
 	}
