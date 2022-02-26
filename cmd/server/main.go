@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -52,7 +53,14 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Println("server started")
+	fmt.Println("mdns server started")
+
+	http.HandleFunc("/hello", func(w http.ResponseWriter, req *http.Request) {
+		fmt.Fprintln(w, "hello")
+	})
+	http.ListenAndServe(":80", nil)
+
+	fmt.Println("http server started")
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
