@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/hashicorp/mdns"
+	"github.com/miekg/dns"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -29,24 +29,42 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	nodes, err := cli.CoreV1().Nodes().List(context.Background(), v1.ListOptions{})
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	var services []Service
+	for _, n := range nodes.Items {
+		var s Service
+		for _, addr := range n.Status.Addresses {
+			if ip := net.ParseIP(addr.Address); ip != nil {
+				s.IP = ip
+			} else {
+				s.Hostname = addr.Address
+			}
+		}
+
+		if s.IP == nil {
+			continue
+		}
+
+		if s.Hostname == "" {
+			s.Hostname = s.IP.String()
+		}
+	}
+
 	s, err := ListServices(context.Background(), cli)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	fmt.Println(s)
-
-	g := s[0]
-	info := []string{"game"}
-	service, err := mdns.NewMDNSService(g.IP.String(), "_http._tcp", g.Hostname+".", g.Hostname+".", 80, []net.IP{g.IP}, info)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	all := Services(append(services, s...))
 
 	// Create the mDNS server, defer shutdown
 	server, err := mdns.NewServer(&mdns.Config{
-		Zone:              service,
 		LogEmptyResponses: true,
+		Zone:              &all,
 	})
 	defer server.Shutdown()
 	if err != nil {
@@ -54,13 +72,6 @@ func main() {
 	}
 
 	fmt.Println("mdns server started")
-
-	http.HandleFunc("/hello", func(w http.ResponseWriter, req *http.Request) {
-		fmt.Fprintln(w, "hello")
-	})
-	http.ListenAndServe(":80", nil)
-
-	fmt.Println("http server started")
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -95,4 +106,14 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) ([]Servi
 	fmt.Println(string(data))
 
 	return out, nil
+}
+
+type Services []Service
+
+func (s *Services) Records(q dns.Question) []dns.RR {
+	fmt.Printf("%+v\n", q)
+	data, _ := json.Marshal(q)
+	fmt.Println(string(data))
+
+	return nil
 }
