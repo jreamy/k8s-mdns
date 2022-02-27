@@ -123,33 +123,33 @@ func (s *Services) Records(q dns.Question) []dns.RR {
 
 	const defaultTTL = 120
 
-	var allRecords []dns.RR
-	for _, srv := range *s {
-		allRecords = append(allRecords, &dns.A{
-			Hdr: dns.RR_Header{
-				Name:   srv.Hostname,
-				Rrtype: dns.TypeA,
-				Class:  dns.ClassINET,
-				Ttl:    defaultTTL,
-			},
-			A: srv.IP,
-		})
-	}
+	// var allRecords []dns.RR
+	// for _, srv := range *s {
+	// 	allRecords = append(allRecords, &dns.A{
+	// 		Hdr: dns.RR_Header{
+	// 			Name:   srv.Hostname,
+	// 			Rrtype: dns.TypeA,
+	// 			Class:  dns.ClassINET,
+	// 			Ttl:    defaultTTL,
+	// 		},
+	// 		A: srv.IP,
+	// 	})
+	// }
 
 	if ip := net.ParseIP(dnsutil.ExtractAddressFromReverse(q.Name)); ip != nil {
 		for _, s := range *s {
 			if s.IP.Equal(ip) {
 				fmt.Println("responding to arp request for " + ip.String() + " with " + s.Hostname)
-				// return []dns.RR{&dns.A{
-				// 	Hdr: dns.RR_Header{
-				// 		Name:   s.Hostname,
-				// 		Rrtype: dns.TypeA,
-				// 		Class:  dns.ClassINET,
-				// 		Ttl:    defaultTTL,
-				// 	},
-				// 	A: ip,
-				// }}
-				return allRecords
+				return []dns.RR{&dns.A{
+					Hdr: dns.RR_Header{
+						Name:   s.Hostname,
+						Rrtype: dns.TypeA,
+						Class:  dns.ClassINET,
+						Ttl:    defaultTTL,
+					},
+					A: ip,
+				}}
+				// return allRecords
 			}
 		}
 	}
