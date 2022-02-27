@@ -144,7 +144,7 @@ func (s *Services) Records(q dns.Question) []dns.RR {
 					Hdr: dns.RR_Header{
 						Name:   s.Hostname,
 						Rrtype: dns.TypeA,
-						Class:  dns.ClassINET,
+						Class:  dns.ClassANY,
 						Ttl:    defaultTTL,
 					},
 					A: ip,
