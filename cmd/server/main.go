@@ -3,11 +3,13 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"github.com/coredns/coredns/plugin/pkg/dnsutil"
@@ -15,12 +17,21 @@ import (
 	"github.com/miekg/dns"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 )
 
 func main() {
 
-	cfg, err := rest.InClusterConfig()
+	var kubeconfig *string
+	if home := homedir.HomeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	}
+	flag.Parse()
+
+	cfg, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -45,7 +56,7 @@ func main() {
 			if ip := net.ParseIP(addr.Address); ip != nil {
 				s.IP = ip
 			} else {
-				s.Hostname = addr.Address + "-node.local."
+				s.Hostname = addr.Address + ".local."
 			}
 		}
 
@@ -104,7 +115,7 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) ([]Servi
 		for _, i := range s.Status.LoadBalancer.Ingress {
 			if ip := net.ParseIP(i.IP); ip != nil {
 				out = append(out, Service{
-					Hostname: s.ObjectMeta.Name + "-service.local.",
+					Hostname: s.ObjectMeta.Name + ".service.local.",
 					IP:       ip,
 				})
 			}
