@@ -23,6 +23,8 @@ import (
 
 func main() {
 
+	ifiFlag := flag.String("ifi", "en0", "network interface to use")
+
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -81,9 +83,15 @@ func main() {
 	data, _ := json.MarshalIndent(all, "", "  ")
 	fmt.Println(string(data))
 
+	ifi, err := net.InterfaceByName(*ifiFlag)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	// Create the mDNS server, defer shutdown
 	server, err := mdns.NewServer(&mdns.Config{
 		LogEmptyResponses: true,
+		Iface:             ifi,
 		Zone:              &all,
 	})
 	defer server.Shutdown()
