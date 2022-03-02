@@ -14,7 +14,6 @@ import (
 	"syscall"
 
 	"github.com/coredns/coredns/plugin/pkg/dnsutil"
-	"github.com/hashicorp/mdns"
 	"github.com/miekg/dns"
 	"golang.org/x/net/ipv4"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -91,15 +90,15 @@ func main() {
 	}
 
 	// Create the mDNS server, defer shutdown
-	server, err := mdns.NewServer(&mdns.Config{
-		LogEmptyResponses: true,
-		Iface:             ifi,
-		Zone:              &all,
-	})
-	defer server.Shutdown()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	// server, err := mdns.NewServer(&mdns.Config{
+	// 	LogEmptyResponses: true,
+	// 	Iface:             ifi,
+	// 	Zone:              &all,
+	// })
+	// defer server.Shutdown()
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
 
 	fmt.Println("mdns server started")
 
