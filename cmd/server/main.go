@@ -124,7 +124,7 @@ func main() {
 				continue
 			}
 
-			fmt.Printf("read %d bytes from %s (%v)\n", n, src, msg)
+			fmt.Printf("read %d bytes from %s (%+v)\n", n, src, msg)
 			fmt.Println(string(data[:n]))
 		}
 	}()
