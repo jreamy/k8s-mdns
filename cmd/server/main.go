@@ -118,7 +118,13 @@ func main() {
 				continue
 			}
 
-			fmt.Printf("read %d bytes from %s\n", n, src)
+			var msg dns.Msg
+			if err := msg.Unpack(data[:n]); err != nil {
+				log.Printf("[ERR] mdns: Failed to unpack packet: %v", err)
+				continue
+			}
+
+			fmt.Printf("read %d bytes from %s (%v)\n", n, src, msg)
 			fmt.Println(string(data[:n]))
 		}
 	}()
