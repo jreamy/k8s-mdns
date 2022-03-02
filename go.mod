@@ -11,5 +11,6 @@ require (
 
 require (
 	github.com/coredns/coredns v1.9.0
+	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )

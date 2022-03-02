@@ -10,11 +10,13 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strconv"
 	"syscall"
 
 	"github.com/coredns/coredns/plugin/pkg/dnsutil"
 	"github.com/hashicorp/mdns"
 	"github.com/miekg/dns"
+	"golang.org/x/net/ipv4"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -101,6 +103,27 @@ func main() {
 
 	fmt.Println("mdns server started")
 
+	l, err := Listener(ifi, net.ParseIP("224.0.0.251"), 5353)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	defer l.LeaveGroup(ifi, &net.UDPAddr{IP: net.ParseIP("224.0.0.251")})
+
+	go func() {
+		for {
+			data := make([]byte, 1500)
+			n, _, src, err := l.ReadFrom(data)
+			if err != nil {
+				fmt.Println("got err", err)
+				continue
+			}
+
+			fmt.Printf("read %d bytes from %s", n, src)
+			fmt.Println(string(data[:n]))
+		}
+	}()
+
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
@@ -131,6 +154,22 @@ func ListServices(ctx context.Context, kubeClient kubernetes.Interface) ([]Servi
 	}
 
 	return out, nil
+}
+
+func Listener(ifi *net.Interface, group net.IP, port int) (*ipv4.PacketConn, error) {
+
+	c, err := net.ListenPacket("udp4", ":"+strconv.Itoa(port))
+	if err != nil {
+		return nil, fmt.Errorf("failed to listen: %w", err)
+	}
+
+	pkt := ipv4.NewPacketConn(c)
+	if err := pkt.JoinGroup(ifi, &net.UDPAddr{IP: group}); err != nil {
+		c.Close()
+		return nil, fmt.Errorf("failed to join group (%s): %w", group, err)
+	}
+
+	return pkt, nil
 }
 
 type Services []Service
